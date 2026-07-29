@@ -1,4 +1,5 @@
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
+import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 const sesClient = new SESClient({
   region: process.env.AWS_REGION,
@@ -9,39 +10,22 @@ const sesClient = new SESClient({
 })
 
 export default async function handler(
-  request: Request,
-): Promise<Response> {
-  if (request.method !== 'POST') {
-    return new Response(
-      JSON.stringify({
-        message: 'Método no permitido.',
-      }),
-      {
-        status: 405,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    )
+  req: VercelRequest,
+  res: VercelResponse,
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({
+      message: 'Método no permitido.',
+    })
   }
 
   try {
-    const body = await request.json()
-
-    const { to, tasks } = body
+    const { to, tasks } = req.body
 
     if (!to || !tasks) {
-      return new Response(
-        JSON.stringify({
-          message: 'Faltan datos para enviar el email.',
-        }),
-        {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        },
-      )
+      return res.status(400).json({
+        message: 'Faltan datos para enviar el email.',
+      })
     }
 
     const taskList = tasks
@@ -81,30 +65,14 @@ Gestor Estratégico de Tareas`,
 
     await sesClient.send(command)
 
-    return new Response(
-      JSON.stringify({
-        message: 'Email enviado correctamente.',
-      }),
-      {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    )
+    return res.status(200).json({
+      message: 'Email enviado correctamente.',
+    })
   } catch (error) {
     console.error('Error al enviar el email:', error)
 
-    return new Response(
-      JSON.stringify({
-        message: 'No se pudo enviar el email.',
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      },
-    )
+    return res.status(500).json({
+      message: 'No se pudo enviar el email.',
+    })
   }
 }
