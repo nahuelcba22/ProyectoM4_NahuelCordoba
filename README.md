@@ -1,10 +1,10 @@
-# TaskFlow
+# Mitarea
 
-Aplicación web de gestión de tareas desarrollada como proyecto educativo. Permite a los usuarios registrarse, iniciar sesión y administrar sus tareas personales mediante operaciones de creación, consulta, edición, actualización de estado y eliminación.
+Aplicación web SPA de gestión de tareas desarrollada como proyecto educativo.
 
-La aplicación también cuenta con un sistema de resumen de tareas mediante envío de correos electrónicos.
+Mitarea permite a los usuarios registrarse, iniciar sesión y administrar sus tareas personales de forma organizada, persistente y accesible desde cualquier dispositivo. La aplicación utiliza Firebase para la autenticación y persistencia de datos, AWS SES para el envío de resúmenes por correo electrónico y Vercel para el despliegue en producción.
 
-(…) Agregar una descripción breve de la motivación del proyecto y del objetivo principal del Proyecto M4.
+El proyecto fue desarrollado aplicando prácticas de arquitectura, tipado con TypeScript, separación de responsabilidades, testing automatizado, seguridad de datos, variables de entorno y control de versiones.
 
 ---
 
@@ -27,8 +27,13 @@ La aplicación también cuenta con un sistema de resumen de tareas mediante env�
 * [Verificar el build de producción](#verificar-el-build-de-producción)
 * [Lint](#lint)
 * [Estructura del proyecto](#estructura-del-proyecto)
+* [Arquitectura y decisiones técnicas](#arquitectura-y-decisiones-técnicas)
 * [Flujo general de la aplicación](#flujo-general-de-la-aplicación)
-* [Operaciones de tareas](#operaciones-de-tareas)
+* [Seguridad](#seguridad)
+* [Flujo de envío de emails](#flujo-de-envío-de-emails)
+* [Testing](#testing)
+* [Deploy](#deploy)
+* [Uso de Inteligencia Artificial](#uso-de-inteligencia-artificial)
 * [Estado actual](#estado-actual)
 * [Próximas mejoras](#próximas-mejoras)
 * [Scripts disponibles](#scripts-disponibles)
@@ -40,40 +45,61 @@ La aplicación también cuenta con un sistema de resumen de tareas mediante env�
 
 ### Autenticación
 
-* Registro de nuevos usuarios.
-* Inicio de sesión.
-* Cierre de sesión.
-* Protección de la ruta principal de tareas.
-* Acceso a las tareas asociadas al usuario autenticado.
+Mitarea cuenta con un sistema de autenticación basado en Firebase Authentication.
 
-(…) Evaluar la incorporación de autenticación mediante Google u otro proveedor OAuth de Firebase.
+Permite:
+
+* Registro de nuevos usuarios mediante email y contraseña.
+* Inicio de sesión mediante email y contraseña.
+* Cierre de sesión.
+* Persistencia de la sesión del usuario.
+* Protección de la ruta principal de tareas.
+* Redirección automática al login cuando un usuario no autenticado intenta acceder a una ruta protegida.
+* Manejo de estados de carga durante la verificación de sesión.
+* Manejo de errores durante el registro y el inicio de sesión.
+
+Cada usuario autenticado accede únicamente a sus propias tareas.
+
+---
 
 ### Gestión de tareas
+
+La aplicación permite realizar un CRUD completo de tareas mediante Cloud Firestore.
+
+Funcionalidades disponibles:
 
 * Crear nuevas tareas.
 * Visualizar las tareas del usuario autenticado.
 * Marcar tareas como completadas.
-* Marcar tareas completadas nuevamente como pendientes.
+* Volver a marcar tareas completadas como pendientes.
 * Editar el título de una tarea.
-* Eliminar tareas con confirmación.
-* Actualización de tareas en tiempo real mediante Firestore.
+* Eliminar tareas mediante confirmación.
+* Persistencia de los datos en Cloud Firestore.
+* Actualización de la interfaz en tiempo real mediante `onSnapshot`.
+* Ordenamiento de las tareas por fecha de creación, mostrando primero las más recientes.
 * Validación de títulos vacíos.
-* Manejo de estados de carga durante las operaciones.
-* Manejo de errores durante las operaciones con las tareas.
+* Manejo de estados de carga.
+* Manejo de errores durante las operaciones.
+* Contador de tareas.
+* Interfaz responsive.
 
-(…) Revisar y definir el orden en el que se muestran las tareas. Actualmente las tareas se reciben desde Firestore sin un orden explícito.
+Las tareas se almacenan asociadas al `userId` del usuario autenticado y las reglas de seguridad de Firestore restringen el acceso para que cada usuario pueda operar únicamente sobre sus propios documentos.
 
-(…) Posible implementación de ordenamiento por fecha de creación, mostrando las tareas más recientes primero.
+---
 
 ### Resumen por email
 
-* Envío de un resumen de las tareas actuales del usuario.
-* Integración con AWS SES.
-* La funcionalidad de envío se gestiona mediante una API Serverless.
+Mitarea permite enviar un resumen del estado actual de las tareas mediante un botón disponible en la aplicación.
 
-(…) Mejorar el diseño visual del correo electrónico.
+El flujo utiliza:
 
-(…) Evaluar la incorporación de una estructura más completa para el email, incluyendo una presentación más atractiva de las tareas y posibles elementos visuales.
+* Frontend desarrollado con React.
+* API Serverless de Vercel.
+* AWS SES para el envío del correo electrónico.
+
+El frontend realiza una petición `POST` a la función Serverless. La función procesa la solicitud y utiliza AWS SES para enviar el resumen al destinatario.
+
+Las credenciales privadas de AWS permanecen exclusivamente en variables de entorno del entorno Serverless y no se exponen en el frontend.
 
 ---
 
@@ -87,33 +113,46 @@ La aplicación también cuenta con un sistema de resumen de tareas mediante env�
 * React Router DOM
 * CSS
 
-### Backend y servicios
+### Backend y servicios administrados
 
 * Firebase Authentication
-* Firebase Firestore
+* Cloud Firestore
 * AWS SES
 * Vercel Serverless Functions
 
 ### Testing y calidad
 
 * Vitest
-* Testing Library
+* React Testing Library
 * JSDOM
 * ESLint
 
-(…) Evaluar la incorporación de más pruebas automatizadas para cubrir las funcionalidades principales de la aplicación.
+### Herramientas de desarrollo
+
+* Git
+* GitHub
+* Vercel
+* Firebase Console
+* AWS Console
 
 ---
 
 ## Requisitos previos
 
-Antes de ejecutar el proyecto, es necesario tener instalado:
+Para ejecutar el proyecto localmente es necesario tener instalado:
 
 * Node.js
 * npm
-* Una cuenta y un proyecto configurado en Firebase.
-* Una cuenta de AWS con acceso a Amazon SES para el envío de emails.
-* Una cuenta de Vercel si se desea desplegar la aplicación y utilizar la función Serverless de envío de emails.
+* Git
+
+Además, se requiere disponer de:
+
+* Un proyecto configurado en Firebase.
+* Firebase Authentication habilitado.
+* Cloud Firestore configurado.
+* Una cuenta de AWS con acceso a Amazon SES.
+* Un correo electrónico autorizado para utilizar AWS SES.
+* Una cuenta de Vercel si se desea realizar el despliegue en producción.
 
 ---
 
@@ -137,13 +176,17 @@ Instalar las dependencias:
 npm install
 ```
 
+Crear un archivo `.env` en la raíz del proyecto tomando como referencia `.env.example`.
+
+Configurar las variables de entorno necesarias antes de ejecutar la aplicación.
+
 ---
 
 ## Variables de entorno
 
-Crear un archivo `.env` en la raíz del proyecto tomando como referencia `.env.example`.
+Mitarea utiliza variables de entorno para configurar Firebase y los servicios privados utilizados por AWS SES.
 
-Las variables necesarias son:
+Crear un archivo `.env` en la raíz del proyecto:
 
 ```env
 VITE_FIREBASE_API_KEY=
@@ -161,21 +204,38 @@ SES_FROM_EMAIL=
 
 ### Firebase
 
-Las variables que comienzan con `VITE_FIREBASE_` corresponden a la configuración del proyecto de Firebase utilizado por la aplicación.
+Las variables que comienzan con `VITE_FIREBASE_` corresponden a la configuración pública del proyecto Firebase utilizado por la aplicación.
 
-Firebase se utiliza principalmente para:
+Firebase se utiliza para:
 
 * Autenticación de usuarios.
-* Almacenamiento de tareas en Firestore.
-* Sincronización de las tareas en tiempo real.
+* Almacenamiento de tareas en Cloud Firestore.
+* Sincronización de tareas en tiempo real.
+
+La configuración de Firebase se carga mediante variables de entorno en `src/services/firebase.ts`.
+
+Las credenciales privadas de AWS no se utilizan directamente en el frontend.
+
+---
 
 ### AWS SES
 
-Las variables relacionadas con AWS se utilizan para enviar el resumen de tareas por correo electrónico mediante Amazon SES.
+Las variables relacionadas con AWS se utilizan exclusivamente en la función Serverless encargada del envío de emails.
 
-Por seguridad, las credenciales privadas de AWS no deben exponerse en el código del frontend ni subirse al repositorio.
+Se utilizan:
 
-El archivo `.env` debe mantenerse fuera del control de versiones.
+* `AWS_ACCESS_KEY_ID`
+* `AWS_SECRET_ACCESS_KEY`
+* `AWS_REGION`
+* `SES_FROM_EMAIL`
+
+Las credenciales privadas de AWS nunca deben incluirse directamente en el código fuente ni subirse al repositorio.
+
+El archivo `.env` debe permanecer fuera del control de versiones y estar incluido en `.gitignore`.
+
+El archivo `.env.example` se incluye como plantilla y no contiene valores sensibles.
+
+En producción, las variables necesarias se configuran como variables de entorno dentro de Vercel.
 
 ---
 
@@ -193,21 +253,28 @@ Vite iniciará la aplicación en modo desarrollo.
 
 ## Ejecutar los tests
 
-Para ejecutar los tests:
+Para ejecutar los tests en modo interactivo:
 
 ```bash
 npm test
 ```
 
-Para ejecutar los tests una sola vez:
+Para ejecutar todos los tests una sola vez:
 
 ```bash
 npm test -- --run
 ```
 
-Actualmente, el proyecto cuenta con pruebas automatizadas para el componente `ProtectedRoute`.
+Actualmente, el proyecto cuenta con **27 tests automatizados** distribuidos en 5 archivos de prueba.
 
-(…) Ampliar la cobertura de tests para las funcionalidades principales de gestión de tareas y autenticación.
+Resultado de la última ejecución:
+
+```text
+Test Files  5 passed (5)
+Tests       27 passed (27)
+```
+
+Los tests cubren componentes, páginas, lógica de autenticación, gestión de tareas y la función Serverless de envío de emails.
 
 ---
 
@@ -224,19 +291,15 @@ Este comando ejecuta:
 1. La compilación y verificación de TypeScript.
 2. El proceso de build de Vite.
 
-Los archivos optimizados para producción se generan dentro de la carpeta `dist`.
+El resultado optimizado se genera dentro de la carpeta `dist`.
 
-La carpeta `dist` contiene la versión compilada y optimizada de la aplicación que se utilizará para producción. No corresponde a archivos originales del proyecto ni a recursos del template de Vite.
-
-Si dentro de `dist` aparecen archivos con nombres generados o recursos gráficos, forman parte del resultado de compilación de la aplicación.
-
-También es posible ejecutar una previsualización local del build:
+También es posible realizar una previsualización local del build:
 
 ```bash
 npm run preview
 ```
 
-(…) Revisar el warning actual de Vite relacionado con el tamaño del bundle generado, aunque actualmente no impide que el build se complete correctamente.
+El build de producción se encuentra funcionando correctamente.
 
 ---
 
@@ -248,9 +311,7 @@ Para analizar el código con ESLint:
 npm run lint
 ```
 
-(…) Ejecutar y verificar ESLint antes de considerar finalizada la versión actual del proyecto.
-
-(…) Corregir cualquier warning o error que pueda aparecer.
+La versión actual del proyecto pasa correctamente el análisis de ESLint sin errores ni advertencias.
 
 ---
 
@@ -259,7 +320,8 @@ npm run lint
 ```text
 .
 ├── api/
-│   └── send-email.ts
+│   ├── send-email.ts
+│   └── send-email.test.ts
 │
 ├── public/
 │   └── favicon.svg
@@ -270,15 +332,20 @@ npm run lint
 │   │   └── ProtectedRoute.test.tsx
 │   │
 │   ├── context/
-│   │   └── AuthContext.tsx
+│   │   ├── AuthContext.tsx
+│   │   ├── AuthContextObject.ts
+│   │   └── useAuth.ts
 │   │
 │   ├── hooks/
 │   │   └── useTasks.ts
 │   │
 │   ├── pages/
 │   │   ├── Login.tsx
+│   │   ├── Login.test.tsx
 │   │   ├── Register.tsx
-│   │   └── Tasks.tsx
+│   │   ├── Register.test.tsx
+│   │   ├── Tasks.tsx
+│   │   └── Tasks.test.tsx
 │   │
 │   ├── services/
 │   │   ├── firebase.ts
@@ -317,21 +384,45 @@ Contiene las funciones Serverless utilizadas por la aplicación.
 
 Actualmente incluye la función encargada de procesar el envío del resumen de tareas mediante AWS SES.
 
+---
+
 **`components/`**
 
 Contiene componentes reutilizables de la aplicación.
 
 Actualmente incluye `ProtectedRoute`, encargado de restringir el acceso a las rutas protegidas.
 
+---
+
 **`context/`**
 
-Contiene el contexto global de autenticación y permite acceder al usuario autenticado y a las funciones relacionadas con la sesión.
+Contiene la gestión global de autenticación.
+
+* `AuthContext.tsx`: proporciona el contexto y el estado de autenticación.
+* `AuthContextObject.ts`: contiene la instancia y los tipos compartidos del contexto.
+* `useAuth.ts`: hook utilizado para acceder al contexto de autenticación.
+
+La separación permite mantener el componente `AuthProvider` independiente del hook consumidor y evita problemas relacionados con React Fast Refresh.
+
+---
 
 **`hooks/`**
 
 Contiene lógica reutilizable de React.
 
-`useTasks` centraliza las operaciones relacionadas con la gestión de tareas y la comunicación con el servicio de tareas.
+`useTasks` centraliza la lógica relacionada con:
+
+* Obtención de tareas.
+* Suscripción a cambios en Firestore.
+* Creación de tareas.
+* Edición.
+* Eliminación.
+* Cambio de estado.
+* Estados de carga y procesamiento.
+* Manejo de errores.
+* Envío del resumen por email.
+
+---
 
 **`pages/`**
 
@@ -341,26 +432,90 @@ Contiene las páginas principales de la aplicación:
 * `Register`: registro de usuarios.
 * `Tasks`: gestión de tareas.
 
+Cada página cuenta con tests automatizados asociados.
+
+---
+
 **`services/`**
 
 Contiene la lógica de comunicación con servicios externos.
 
-* `firebase.ts`: configuración e inicialización de Firebase.
-* `taskService.ts`: operaciones relacionadas con las tareas en Firestore.
+* `firebase.ts`: inicialización de Firebase Authentication y Firestore.
+* `taskService.ts`: operaciones CRUD y suscripción en tiempo real a las tareas.
+
+---
 
 **`types/`**
 
 Contiene las definiciones de tipos utilizadas por TypeScript.
 
+Actualmente incluye la interfaz `Task`, utilizada para representar las tareas de la aplicación.
+
+---
+
 **`test/`**
 
-Contiene la configuración utilizada por el entorno de pruebas.
+Contiene la configuración compartida utilizada por el entorno de pruebas.
+
+---
 
 **`public/`**
 
 Contiene recursos públicos utilizados directamente por la aplicación.
 
-Actualmente incluye el favicon de la aplicación.
+Actualmente incluye el favicon.
+
+---
+
+## Arquitectura y decisiones técnicas
+
+Mitarea utiliza una arquitectura orientada a separar la interfaz, la lógica de negocio y las integraciones con servicios externos.
+
+### React + TypeScript
+
+React se utiliza para construir una SPA modular mediante componentes reutilizables.
+
+TypeScript permite definir estructuras de datos y contratos claros entre las diferentes partes de la aplicación, reduciendo errores y mejorando el mantenimiento del código.
+
+---
+
+### Context API para autenticación
+
+El estado global de autenticación se gestiona mediante React Context.
+
+Esto permite que los componentes puedan acceder al usuario autenticado y a las operaciones de registro, login y logout sin necesidad de pasar estas funciones mediante múltiples niveles de props.
+
+---
+
+### Custom Hooks
+
+La lógica relacionada con la gestión de tareas se centraliza en `useTasks`.
+
+De esta manera, las páginas se encargan principalmente de la presentación y la interacción con el usuario, mientras que la lógica de negocio y comunicación con los servicios se mantiene separada.
+
+---
+
+### Servicios
+
+Las operaciones relacionadas con Firestore se mantienen en `taskService.ts`.
+
+Esto permite desacoplar la lógica de acceso a datos de los componentes de interfaz y facilita su reutilización y testing.
+
+---
+
+### Funciones Serverless
+
+El envío de emails se realiza mediante una función Serverless de Vercel.
+
+Esta decisión permite mantener las credenciales privadas de AWS fuera del código que se ejecuta en el navegador.
+
+---
+
+### Tiempo real con Firestore
+
+Las tareas se sincronizan mediante `onSnapshot`.
+
+Esto permite que la interfaz reciba automáticamente las modificaciones realizadas sobre los documentos correspondientes al usuario autenticado.
 
 ---
 
@@ -377,13 +532,22 @@ Usuario
    ├── Inicio de sesión
    │      │
    │      ▼
-   │   Ruta protegida
+   │   AuthContext
+   │      │
+   │      ▼
+   │   ProtectedRoute
    │      │
    │      ▼
    │   Gestor de tareas
    │      │
    │      ▼
-   │   Firebase Firestore
+   │   useTasks
+   │      │
+   │      ▼
+   │   taskService
+   │      │
+   │      ▼
+   │   Cloud Firestore
    │
    └── Envío de resumen
           │
@@ -397,73 +561,286 @@ Usuario
      Correo electrónico
 ```
 
-(…) Evaluar la incorporación de autenticación mediante Google utilizando Firebase Authentication y un flujo OAuth.
+---
 
-(…) Revisar y mejorar el sistema de envío de resumen por email.
+## Seguridad
+
+Mitarea implementa diferentes medidas para proteger los datos de los usuarios y las credenciales de los servicios externos.
+
+### Firestore
+
+Las reglas de seguridad de Cloud Firestore restringen el acceso a las tareas según el usuario autenticado.
+
+Cada documento contiene un `userId` y las reglas verifican que el usuario autenticado coincida con el propietario del documento.
+
+La lógica implementada permite:
+
+* Leer únicamente tareas propias.
+* Crear tareas asociadas al usuario autenticado.
+* Actualizar únicamente tareas propias.
+* Eliminar únicamente tareas propias.
+
+Las operaciones de actualización también verifican que el `userId` del documento no pueda ser modificado para transferir la propiedad de una tarea a otro usuario.
 
 ---
 
-## Operaciones de tareas
+### Variables de entorno
 
-Las tareas pertenecen al usuario autenticado y se almacenan en Firebase Firestore.
+Las variables sensibles utilizadas por AWS SES se mantienen en variables de entorno.
 
-La aplicación permite realizar las siguientes operaciones:
+El archivo `.env` está excluido mediante `.gitignore`.
 
-| Operación         | Descripción                                   |
-| ----------------- | --------------------------------------------- |
-| Crear             | Crea una nueva tarea asociada al usuario      |
-| Leer              | Obtiene las tareas del usuario en tiempo real |
-| Actualizar estado | Cambia entre completada y pendiente           |
-| Editar            | Modifica el título de una tarea               |
-| Eliminar          | Elimina una tarea después de una confirmación |
+El archivo `.env.example` se utiliza como plantilla sin valores sensibles.
+
+En producción, las variables se configuran mediante el entorno de Vercel.
+
+---
+
+### API Serverless
+
+Las credenciales de AWS no se envían al frontend.
+
+El frontend únicamente realiza una solicitud a:
+
+```text
+POST /api/send-email
+```
+
+La función Serverless utiliza las variables de entorno configuradas en Vercel para comunicarse con AWS SES.
+
+---
+
+## Flujo de envío de emails
+
+El envío del resumen sigue el siguiente flujo:
+
+```text
+Usuario presiona "Enviar resumen"
+             │
+             ▼
+       React / Tasks
+             │
+             │ POST /api/send-email
+             │
+             ▼
+     Vercel Serverless Function
+             │
+             ├── Valida método HTTP
+             ├── Valida destinatario
+             ├── Valida lista de tareas
+             │
+             ▼
+          AWS SES
+             │
+             ▼
+     Correo electrónico
+             │
+             ▼
+     Respuesta al frontend
+             │
+             ├── Éxito
+             └── Error
+```
+
+La función Serverless devuelve diferentes respuestas según el resultado de la operación:
+
+* `200`: email enviado correctamente.
+* `400`: faltan datos necesarios.
+* `405`: método HTTP no permitido.
+* `500`: error durante el envío mediante AWS SES.
+
+La interfaz muestra al usuario el estado correspondiente de la operación.
+
+---
+
+## Testing
+
+El proyecto utiliza Vitest y React Testing Library para validar el comportamiento de la aplicación.
+
+Actualmente se cuenta con **27 tests automatizados**.
+
+### ProtectedRoute
+
+Se prueban:
+
+* Estado de carga.
+* Redirección de usuarios no autenticados.
+* Acceso de usuarios autenticados.
+
+### Login
+
+Se prueban:
+
+* Renderizado inicial.
+* Validación de campos vacíos.
+* Login exitoso.
+* Manejo de errores.
+* Estado de carga.
+
+### Register
+
+Se prueban:
+
+* Renderizado inicial.
+* Validación de campos vacíos.
+* Registro exitoso.
+* Manejo de errores.
+* Estado de carga.
+
+### Tasks
+
+Se prueban:
+
+* Estado sin tareas.
+* Renderizado de tareas pendientes y completadas.
+* Creación de tareas.
+* Cambio de estado.
+* Edición de tareas.
+* Eliminación con confirmación.
+* Envío exitoso del resumen por email.
+* Error de la función Serverless.
+
+### API Serverless
+
+Se prueban:
+
+* Método HTTP no permitido.
+* Falta de destinatario.
+* Falta de tareas.
+* Envío exitoso mediante AWS SES.
+* Error de AWS SES.
+
+Los servicios externos se mockean cuando corresponde para mantener los tests aislados y evitar dependencias de servicios reales durante la ejecución de las pruebas.
+
+Resultado actual:
+
+```text
+Test Files  5 passed (5)
+Tests       27 passed (27)
+```
+
+---
+
+## Deploy
+
+La aplicación se encuentra desplegada en Vercel.
+
+**URL de producción:**
+
+> [https://proyecto-m4-nahuel-cordoba.vercel.app/login]
+
+El entorno de producción utiliza variables de entorno configuradas directamente en Vercel.
+
+Las principales funcionalidades verificadas en producción son:
+
+* Registro.
+* Login.
+* Logout.
+* Protección de rutas.
+* CRUD de tareas.
+* Persistencia en Firestore.
+* Sincronización en tiempo real.
+* Ordenamiento de tareas por fecha de creación.
+* Envío de resumen mediante AWS SES.
+
+---
+
+## Uso de Inteligencia Artificial
+
+La Inteligencia Artificial fue utilizada como herramienta de apoyo durante el proceso de desarrollo del proyecto.
+
+El objetivo no fue delegar completamente la implementación, sino utilizar IA como asistente para analizar problemas, explorar alternativas y mejorar la calidad del código manteniendo la comprensión del funcionamiento de cada parte implementada.
+
+Entre los principales usos se encuentran:
+
+* Análisis y revisión de la arquitectura del proyecto.
+* Exploración de buenas prácticas para React y TypeScript.
+* Revisión de la separación entre componentes, hooks y servicios.
+* Análisis de reglas de seguridad de Firestore.
+* Revisión del manejo de variables de entorno.
+* Generación y mejora de tests unitarios y de componentes.
+* Análisis de errores detectados por ESLint.
+* Revisión de posibles problemas de tipado.
+* Revisión de la configuración de Vercel y las funciones Serverless.
+* Análisis de posibles mejoras en la estructura del proyecto.
+* Revisión de la documentación.
+
+Un patrón de uso importante consistió en utilizar la IA para analizar problemas concretos y luego verificar las propuestas mediante la documentación oficial, la ejecución de tests, el build y las pruebas manuales de la aplicación.
+
+También se utilizó IA para generar propuestas iniciales de tests y posteriormente validar que dichos tests realmente comprobaran el comportamiento esperado de la aplicación.
+
+Este proceso permitió identificar y corregir problemas relacionados con:
+
+* Uso innecesario de `any`.
+* Organización del contexto de autenticación.
+* Reglas de ESLint.
+* Gestión de estados en hooks.
+* Cobertura de testing.
+* Manejo de mocks.
+* Separación de responsabilidades.
+
+La utilización de IA se realizó priorizando la comprensión del código generado o modificado y la validación posterior mediante herramientas de desarrollo.
 
 ---
 
 ## Estado actual
 
-La aplicación se encuentra actualmente en una versión funcional con las principales características implementadas:
+Mitarea se encuentra actualmente en una versión funcional y desplegada en producción.
 
-* Autenticación de usuarios.
-* Rutas protegidas.
+Las principales características implementadas son:
+
+* Autenticación mediante Firebase.
+* Registro de usuarios.
+* Inicio de sesión.
+* Logout.
+* Protección de rutas.
+* Persistencia de sesión.
 * CRUD completo de tareas.
-* Actualización de tareas en tiempo real.
-* Cambio de estado entre completado y pendiente.
+* Persistencia en Cloud Firestore.
+* Filtrado de tareas por usuario autenticado.
+* Sincronización en tiempo real.
+* Ordenamiento por fecha de creación.
+* Cambio entre tareas pendientes y completadas.
 * Edición de tareas.
-* Eliminación de tareas con confirmación.
-* Envío de resumen por email.
+* Eliminación con confirmación.
 * Validaciones básicas.
 * Manejo de estados de carga.
 * Manejo de errores.
+* Envío de resumen por email.
+* Integración con AWS SES.
+* Función Serverless en Vercel.
+* Variables de entorno configuradas correctamente.
+* Reglas de seguridad de Firestore implementadas.
 * Tests automatizados.
+* 27 tests pasando correctamente.
+* ESLint sin errores ni advertencias.
 * Build de producción funcionando correctamente.
-
-La aplicación cuenta actualmente con una interfaz funcional y responsive.
-
-El funcionamiento técnico principal se encuentra implementado y operativo.
+* Deploy público en Vercel.
+* Interfaz responsive.
 
 ---
 
 ## Próximas mejoras
 
-Una vez finalizada y verificada la versión funcional actual, se contempla realizar una segunda etapa enfocada principalmente en la experiencia de usuario y la presentación visual.
+Aunque la versión actual cumple con las funcionalidades principales del proyecto, existen posibles mejoras que podrían implementarse posteriormente:
 
-Posibles mejoras:
-
-* Rediseño general de la interfaz.
-* Mejora de la experiencia responsive en dispositivos móviles.
-* Revisión de la jerarquía visual y distribución de los elementos.
+* Rediseño visual general de la interfaz.
+* Mejora de la experiencia de usuario en dispositivos móviles.
+* Mejora de la jerarquía visual.
 * Mejora de los estados visuales de las tareas.
 * Mejora de los formularios de autenticación.
 * Incorporación de autenticación mediante Google.
-* Revisión y mejora del diseño del email enviado.
-* Implementación de un orden explícito para las tareas.
-* Posible ordenamiento por fecha de creación.
+* Mejora del diseño visual del email.
+* Incorporación de una presentación HTML más completa para los resúmenes.
+* Implementación de filtros para tareas pendientes, completadas y todas.
+* Incorporación de fechas de vencimiento.
+* Ordenamiento por prioridad.
+* Implementación de drag & drop para reordenar tareas.
 * Mejora de la accesibilidad.
 * Ampliación de la cobertura de tests.
-* Revisión del bundle de producción y posible optimización del código.
-* (…) Evaluar la incorporación de nuevas funcionalidades según las necesidades del proyecto.
+* Optimización del bundle de producción.
 
-(…) El rediseño visual se realizará sobre una rama o commit separado, permitiendo comparar la nueva versión con la versión funcional actual y conservar la posibilidad de volver al diseño anterior si el resultado no es satisfactorio.
+Las futuras modificaciones visuales o funcionales podrán desarrollarse mediante ramas o commits separados para mantener una versión estable y facilitar la comparación entre diferentes iteraciones del proyecto.
 
 ---
 
@@ -475,7 +852,7 @@ Posibles mejoras:
 npm run dev
 ```
 
-Inicia el servidor de desarrollo.
+Inicia el servidor de desarrollo de Vite.
 
 ### Build
 
@@ -483,7 +860,7 @@ Inicia el servidor de desarrollo.
 npm run build
 ```
 
-Compila TypeScript y genera el build de producción mediante Vite.
+Compila TypeScript y genera el build de producción.
 
 ### Preview
 
@@ -499,9 +876,7 @@ Previsualiza localmente el build de producción.
 npm run lint
 ```
 
-Ejecuta ESLint para analizar el código.
-
-(…) Verificar que el script funcione correctamente y resolver cualquier warning o error detectado.
+Ejecuta ESLint sobre el proyecto.
 
 ### Tests
 
@@ -523,6 +898,7 @@ npm test -- --run
 
 **Nahuel Córdoba**
 
-(…) Agregar enlaces al perfil de GitHub y, si corresponde, LinkedIn o portfolio.
+GitHub: [https://github.com/nahuelcba22]
 
----
+LinkedIn: [https://www.linkedin.com/in/nahuelcba02]
+
