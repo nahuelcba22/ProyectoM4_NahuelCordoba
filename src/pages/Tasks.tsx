@@ -4,24 +4,12 @@ addDoc,
 collection,
 deleteDoc,
 doc,
-onSnapshot,
-query,
 updateDoc,
-where,
 } from 'firebase/firestore'
 import { useAuth } from '../context/AuthContext'
 import { db } from '../services/firebase'
-
-interface Task {
-id: string
-title: string
-completed: boolean
-userId: string
-createdAt: {
-seconds: number
-nanoseconds: number
-}
-}
+import type { Task } from '../types/task'
+import { subscribeToUserTasks } from '../services/taskService'
 
 function Tasks() {
 const { user, logout } = useAuth()
@@ -41,33 +29,20 @@ null,
 )
 
 useEffect(() => {
-if (!user) {
-setTasks([])
-return
-}
+  if (!user) {
+    setTasks([])
+    return
+  }
 
-const tasksQuery = query(
-  collection(db, 'tasks'),
-  where('userId', '==', user.uid),
-)
-
-const unsubscribe = onSnapshot(
-  tasksQuery,
-  (snapshot) => {
-    const tasksData = snapshot.docs.map((document) => ({
-      id: document.id,
-      ...document.data(),
-    })) as Task[]
-
-    setTasks(tasksData)
-  },
-  () => {
-    setMessage('No se pudieron cargar las tareas.')
-  },
-)
-
-return unsubscribe
-
+  return subscribeToUserTasks(
+    user.uid,
+    (tasks) => {
+      setTasks(tasks)
+    },
+    () => {
+      setMessage('No se pudieron cargar las tareas.')
+    },
+  )
 }, [user])
 
 useEffect(() => {
