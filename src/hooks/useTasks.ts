@@ -39,7 +39,7 @@ export function useTasks(userId: string | undefined) {
     )
   }, [userId])
 
-  const addTask = async (title: string) => {
+  const addTask = async (title: string, description: string = '') => {
     if (!userId) {
       setMessage('Tenés que iniciar sesión para crear una tarea.')
       return false
@@ -54,7 +54,7 @@ export function useTasks(userId: string | undefined) {
       setLoading(true)
       setMessage('')
 
-      await createTask(title, userId)
+      await createTask(title, description, userId)
 
       setMessage('Tarea creada correctamente.')
       return true
@@ -98,6 +98,7 @@ export function useTasks(userId: string | undefined) {
   const editTask = async (
     taskId: string,
     title: string,
+    description: string = '',
   ) => {
     if (!title.trim()) {
       setMessage('El título no puede estar vacío.')
@@ -112,7 +113,7 @@ export function useTasks(userId: string | undefined) {
       setProcessingTaskId(taskId)
       setMessage('')
 
-      await updateTask(taskId, title)
+      await updateTask(taskId, title, description)
 
       setMessage('Tarea editada correctamente.')
       return true

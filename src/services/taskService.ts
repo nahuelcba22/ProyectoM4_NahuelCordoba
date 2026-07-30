@@ -52,10 +52,12 @@ export function subscribeToUserTasks(
 
 export async function createTask(
   title: string,
+  description: string,
   userId: string,
 ): Promise<void> {
   await addDoc(collection(db, 'tasks'), {
     title: title.trim(),
+    description: description.trim(),
     completed: false,
     userId,
     createdAt: new Date(),
@@ -74,9 +76,11 @@ export async function toggleTaskCompleted(
 export async function updateTask(
   taskId: string,
   title: string,
+  description: string = '',
 ): Promise<void> {
   await updateDoc(doc(db, 'tasks', taskId), {
     title: title.trim(),
+    description: description.trim(),
   })
 }
 

@@ -19,10 +19,12 @@ function Tasks() {
   } = useTasks(user?.uid)
 
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [emailLoading, setEmailLoading] = useState(false)
 
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
+  const [editingDescription, setEditingDescription] = useState('')
 
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null)
 
@@ -41,10 +43,11 @@ function Tasks() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const success = await addTask(title)
+    const success = await addTask(title, description)
 
     if (success) {
       setTitle('')
+      setDescription('')
     }
   }
 
@@ -92,6 +95,7 @@ function Tasks() {
   const handleStartEditing = (task: Task) => {
     setEditingTaskId(task.id)
     setEditingTitle(task.title)
+    setEditingDescription(task.description || '')
     setDeletingTaskId(null)
     setMessage('')
   }
@@ -99,14 +103,16 @@ function Tasks() {
   const handleCancelEditing = () => {
     setEditingTaskId(null)
     setEditingTitle('')
+    setEditingDescription('')
   }
 
   const handleSaveEdit = async (taskId: string) => {
-    const success = await editTask(taskId, editingTitle)
+    const success = await editTask(taskId, editingTitle, editingDescription)
 
     if (success) {
       setEditingTaskId(null)
       setEditingTitle('')
+      setEditingDescription('')
     }
   }
 
@@ -168,6 +174,14 @@ function Tasks() {
               disabled={loading}
             />
 
+            <input
+              type="text"
+              placeholder="Descripción (opcional)"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              disabled={loading}
+            />
+
             <button type="submit" disabled={loading}>
               {loading ? 'Creando...' : 'Agregar tarea'}
             </button>
@@ -225,12 +239,23 @@ function Tasks() {
                     <div className="task-edit">
                       <input
                         type="text"
+                        placeholder="Título de la tarea"
                         value={editingTitle}
                         onChange={(event) =>
                           setEditingTitle(event.target.value)
                         }
                         disabled={processingTaskId === task.id}
                         autoFocus
+                      />
+
+                      <input
+                        type="text"
+                        placeholder="Descripción (opcional)"
+                        value={editingDescription}
+                        onChange={(event) =>
+                          setEditingDescription(event.target.value)
+                        }
+                        disabled={processingTaskId === task.id}
                       />
 
                       <div className="task-actions">
@@ -301,6 +326,12 @@ function Tasks() {
                         <span className="task-title">
                           {task.title}
                         </span>
+
+                        {task.description && (
+                          <p className="task-description">
+                            {task.description}
+                          </p>
+                        )}
                       </div>
 
                       <div className="task-actions">

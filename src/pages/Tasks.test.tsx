@@ -158,7 +158,7 @@ describe('Tasks Page Component', () => {
     )
 
     expect(mockAddTask).toHaveBeenCalledTimes(1)
-    expect(mockAddTask).toHaveBeenCalledWith('Nueva tarea')
+    expect(mockAddTask).toHaveBeenCalledWith('Nueva tarea', '')
   })
 
   it('4. Completar una tarea: llama a toggleTask con el ID y completed = false', async () => {
@@ -218,7 +218,8 @@ describe('Tasks Page Component', () => {
     expect(mockEditTask).toHaveBeenCalledTimes(1)
     expect(mockEditTask).toHaveBeenCalledWith(
       'task-1',
-      'Título actualizado'
+      'Título actualizado',
+      ''
     )
   })
 
