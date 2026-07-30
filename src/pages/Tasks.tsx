@@ -107,7 +107,11 @@ function Tasks() {
   }
 
   const handleSaveEdit = async (taskId: string) => {
-    const success = await editTask(taskId, editingTitle, editingDescription)
+    const success = await editTask(
+      taskId,
+      editingTitle,
+      editingDescription,
+    )
 
     if (success) {
       setEditingTaskId(null)
@@ -216,7 +220,7 @@ function Tasks() {
         <section className="task-list-section">
           <div className="task-list-header">
             <h2>Mis tareas</h2>
-            <span>{tasks.length}</span>
+            <span className="task-list-count">{tasks.length}</span>
           </div>
 
           {tasks.length === 0 ? (

@@ -72,13 +72,20 @@ describe('Tasks Page Component', () => {
 
     mockUseTasks.mockImplementation(() => {
       const [message, setMessageState] = useState('')
+
       return {
         tasks: currentTasks,
         loading: false,
         processingTaskId: null,
         message,
-        setMessage: (msg: string | ((prev: string) => string)) => {
-          const nextValue = typeof msg === 'function' ? msg(message) : msg
+        setMessage: (
+          msg: string | ((prev: string) => string),
+        ) => {
+          const nextValue =
+            typeof msg === 'function'
+              ? msg(message)
+              : msg
+
           setMessageState(nextValue)
           mockSetMessage(nextValue)
         },
@@ -101,21 +108,23 @@ describe('Tasks Page Component', () => {
     render(<Tasks />)
 
     expect(
-      screen.getByText('No tenés tareas todavía.')
-    ).toBeInTheDocument()
-    expect(
-      screen.getByText('Creá tu primera tarea para comenzar.')
+      screen.getByText('No tenés tareas todavía.'),
     ).toBeInTheDocument()
 
-    const listHeader = screen.getByText('Mis tareas', {
-      selector: 'h2',
-    }).parentElement!
-    expect(within(listHeader).getByText('0')).toBeInTheDocument()
+    expect(
+      screen.getByText('Creá tu primera tarea para comenzar.'),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText('0', {
+        selector: '.task-list-count',
+      }),
+    ).toBeInTheDocument()
 
     expect(
       screen.getByRole('button', {
         name: 'Enviar resumen por email',
-      })
+      }),
     ).toBeDisabled()
   })
 
@@ -124,22 +133,30 @@ describe('Tasks Page Component', () => {
 
     render(<Tasks />)
 
-    expect(screen.getByText('Tarea pendiente')).toBeInTheDocument()
-    expect(screen.getByText('Tarea completada')).toBeInTheDocument()
+    expect(
+      screen.getByText('Tarea pendiente'),
+    ).toBeInTheDocument()
 
-    const listHeader = screen.getByText('Mis tareas', {
-      selector: 'h2',
-    }).parentElement!
-    expect(within(listHeader).getByText('2')).toBeInTheDocument()
+    expect(
+      screen.getByText('Tarea completada'),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByText('2', {
+        selector: '.task-list-count',
+      }),
+    ).toBeInTheDocument()
 
     const completedCard = screen
       .getByText('Tarea completada')
       .closest('article')
+
     expect(completedCard).toHaveClass('task-completed')
 
     const pendingCard = screen
       .getByText('Tarea pendiente')
       .closest('article')
+
     expect(pendingCard).not.toHaveClass('task-completed')
   })
 
@@ -150,43 +167,64 @@ describe('Tasks Page Component', () => {
 
     render(<Tasks />)
 
-    const input = screen.getByPlaceholderText('¿Qué necesitás hacer?')
+    const input = screen.getByPlaceholderText(
+      '¿Qué necesitás hacer?',
+    )
+
     await user.type(input, 'Nueva tarea')
 
     await user.click(
-      screen.getByRole('button', { name: 'Agregar tarea' })
+      screen.getByRole('button', {
+        name: 'Agregar tarea',
+      }),
     )
 
     expect(mockAddTask).toHaveBeenCalledTimes(1)
-    expect(mockAddTask).toHaveBeenCalledWith('Nueva tarea', '')
+
+    expect(mockAddTask).toHaveBeenCalledWith(
+      'Nueva tarea',
+      '',
+    )
   })
 
   it('4. Completar una tarea: llama a toggleTask con el ID y completed = false', async () => {
-    currentTasks = [sampleTasks[0]] // Tarea pendiente
+    currentTasks = [sampleTasks[0]]
     const user = userEvent.setup()
 
     render(<Tasks />)
 
     await user.click(
-      screen.getByRole('button', { name: 'Completar' })
+      screen.getByRole('button', {
+        name: 'Completar',
+      }),
     )
 
     expect(mockToggleTask).toHaveBeenCalledTimes(1)
-    expect(mockToggleTask).toHaveBeenCalledWith('task-1', false)
+
+    expect(mockToggleTask).toHaveBeenCalledWith(
+      'task-1',
+      false,
+    )
   })
 
   it('5. Marcar una tarea completada como pendiente: llama a toggleTask con el ID y completed = true', async () => {
-    currentTasks = [sampleTasks[1]] // Tarea completada
+    currentTasks = [sampleTasks[1]]
     const user = userEvent.setup()
 
     render(<Tasks />)
 
     await user.click(
-      screen.getByRole('button', { name: 'Pendiente' })
+      screen.getByRole('button', {
+        name: 'Pendiente',
+      }),
     )
 
     expect(mockToggleTask).toHaveBeenCalledTimes(1)
-    expect(mockToggleTask).toHaveBeenCalledWith('task-2', true)
+
+    expect(mockToggleTask).toHaveBeenCalledWith(
+      'task-2',
+      true,
+    )
   })
 
   it('6. Editar una tarea: abre input de edición y llama a editTask con el ID y el nuevo título', async () => {
@@ -205,21 +243,37 @@ describe('Tasks Page Component', () => {
 
     render(<Tasks />)
 
-    await user.click(screen.getByRole('button', { name: 'Editar' }))
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Editar',
+      }),
+    )
 
-    const editInput = screen.getByDisplayValue('Título original')
+    const editInput = screen.getByDisplayValue(
+      'Título original',
+    )
+
     expect(editInput).toBeInTheDocument()
 
     await user.clear(editInput)
-    await user.type(editInput, 'Título actualizado')
 
-    await user.click(screen.getByRole('button', { name: 'Guardar' }))
+    await user.type(
+      editInput,
+      'Título actualizado',
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Guardar',
+      }),
+    )
 
     expect(mockEditTask).toHaveBeenCalledTimes(1)
+
     expect(mockEditTask).toHaveBeenCalledWith(
       'task-1',
       'Título actualizado',
-      ''
+      '',
     )
   })
 
@@ -230,40 +284,51 @@ describe('Tasks Page Component', () => {
 
     render(<Tasks />)
 
-    // A: Probar cancelación
     await user.click(
-      screen.getByRole('button', { name: 'Eliminar' })
+      screen.getByRole('button', {
+        name: 'Eliminar',
+      }),
     )
 
     expect(
-      screen.getByText('¿Eliminar esta tarea?')
+      screen.getByText('¿Eliminar esta tarea?'),
     ).toBeInTheDocument()
 
     await user.click(
-      screen.getByRole('button', { name: 'Cancelar' })
+      screen.getByRole('button', {
+        name: 'Cancelar',
+      }),
     )
 
     expect(
-      screen.queryByText('¿Eliminar esta tarea?')
+      screen.queryByText('¿Eliminar esta tarea?'),
     ).not.toBeInTheDocument()
+
     expect(mockRemoveTask).not.toHaveBeenCalled()
 
-    // B: Probar confirmación de eliminación
     await user.click(
-      screen.getByRole('button', { name: 'Eliminar' })
+      screen.getByRole('button', {
+        name: 'Eliminar',
+      }),
     )
 
     const confirmationContainer = screen
       .getByText('¿Eliminar esta tarea?')
       .closest('div')!
+
     const confirmDeleteButton = within(
-      confirmationContainer
-    ).getByRole('button', { name: 'Eliminar' })
+      confirmationContainer,
+    ).getByRole('button', {
+      name: 'Eliminar',
+    })
 
     await user.click(confirmDeleteButton)
 
     expect(mockRemoveTask).toHaveBeenCalledTimes(1)
-    expect(mockRemoveTask).toHaveBeenCalledWith('task-1')
+
+    expect(mockRemoveTask).toHaveBeenCalledWith(
+      'task-1',
+    )
   })
 
   it('8. Envío exitoso del resumen por email: llama a fetch con los datos correctos y muestra mensaje de éxito', async () => {
@@ -275,6 +340,7 @@ describe('Tasks Page Component', () => {
         message: 'Email enviado correctamente.',
       }),
     })
+
     vi.stubGlobal('fetch', fetchMock)
 
     const user = userEvent.setup()
@@ -284,10 +350,11 @@ describe('Tasks Page Component', () => {
     await user.click(
       screen.getByRole('button', {
         name: 'Enviar resumen por email',
-      })
+      }),
     )
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
+
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/send-email',
       expect.objectContaining({
@@ -299,16 +366,17 @@ describe('Tasks Page Component', () => {
           to: 'user@example.com',
           tasks: [sampleTasks[0]],
         }),
-      })
+      }),
     )
 
     expect(
       await screen.findByText(
-        'Resumen enviado correctamente a tu email.'
-      )
+        'Resumen enviado correctamente a tu email.',
+      ),
     ).toBeInTheDocument()
+
     expect(mockSetMessage).toHaveBeenCalledWith(
-      'Resumen enviado correctamente a tu email.'
+      'Resumen enviado correctamente a tu email.',
     )
   })
 
@@ -321,6 +389,7 @@ describe('Tasks Page Component', () => {
         message: 'No se pudo procesar la solicitud.',
       }),
     })
+
     vi.stubGlobal('fetch', fetchMock)
 
     const user = userEvent.setup()
@@ -330,16 +399,17 @@ describe('Tasks Page Component', () => {
     await user.click(
       screen.getByRole('button', {
         name: 'Enviar resumen por email',
-      })
+      }),
     )
 
     expect(
       await screen.findByText(
-        'No se pudo enviar el resumen por email.'
-      )
+        'No se pudo enviar el resumen por email.',
+      ),
     ).toBeInTheDocument()
+
     expect(mockSetMessage).toHaveBeenCalledWith(
-      'No se pudo enviar el resumen por email.'
+      'No se pudo enviar el resumen por email.',
     )
   })
 })
