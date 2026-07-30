@@ -2,14 +2,39 @@
 
 Aplicación web SPA de gestión de tareas desarrollada como proyecto educativo.
 
-Mitarea permite a los usuarios registrarse, iniciar sesión y administrar sus tareas personales de forma organizada, persistente y accesible desde cualquier dispositivo. La aplicación utiliza Firebase para la autenticación y persistencia de datos, AWS SES para el envío de resúmenes por correo electrónico y Vercel para el despliegue en producción.
+Mitarea permite a los usuarios registrarse, iniciar sesión y administrar sus tareas personales de forma organizada, persistente y accesible desde cualquier dispositivo.
 
-El proyecto fue desarrollado aplicando prácticas de arquitectura, tipado con TypeScript, separación de responsabilidades, testing automatizado, seguridad de datos, variables de entorno y control de versiones.
+La aplicación utiliza **React + TypeScript** en el frontend, **Firebase Authentication** para la gestión de usuarios, **Cloud Firestore** para la persistencia y sincronización de tareas, **AWS SES** para el envío de resúmenes por correo electrónico y **Vercel** para el despliegue de la aplicación y la función Serverless encargada del envío de emails.
+
+El proyecto fue desarrollado aplicando prácticas de arquitectura, separación de responsabilidades, tipado estático, testing automatizado, seguridad de datos, variables de entorno y control de versiones.
+
+---
+
+## Demo
+
+**Aplicación desplegada en producción:**
+
+[proyecto-m4-nahuel-cordoba.vercel.app](https://proyecto-m4-nahuel-cordoba.vercel.app/login)
+
+La aplicación puede probarse directamente desde el entorno de producción.
+
+Las funcionalidades principales disponibles incluyen:
+
+* Registro de usuarios.
+* Inicio y cierre de sesión.
+* Protección de rutas.
+* Gestión completa de tareas.
+* Persistencia de datos en Firestore.
+* Sincronización de tareas en tiempo real.
+* Edición y eliminación de tareas.
+* Cambio entre tareas pendientes y completadas.
+* Envío de resumen de tareas por email.
 
 ---
 
 ## Índice
 
+* [Demo](#demo)
 * [Funcionalidades](#funcionalidades)
 
   * [Autenticación](#autenticación)
@@ -23,15 +48,14 @@ El proyecto fue desarrollado aplicando prácticas de arquitectura, tipado con Ty
   * [Firebase](#firebase)
   * [AWS SES](#aws-ses)
 * [Ejecutar en desarrollo](#ejecutar-en-desarrollo)
-* [Ejecutar los tests](#ejecutar-los-tests)
-* [Verificar el build de producción](#verificar-el-build-de-producción)
+* [Testing](#testing)
+* [Build de producción](#build-de-producción)
 * [Lint](#lint)
 * [Estructura del proyecto](#estructura-del-proyecto)
 * [Arquitectura y decisiones técnicas](#arquitectura-y-decisiones-técnicas)
 * [Flujo general de la aplicación](#flujo-general-de-la-aplicación)
 * [Seguridad](#seguridad)
 * [Flujo de envío de emails](#flujo-de-envío-de-emails)
-* [Testing](#testing)
 * [Deploy](#deploy)
 * [Uso de Inteligencia Artificial](#uso-de-inteligencia-artificial)
 * [Estado actual](#estado-actual)
@@ -64,42 +88,44 @@ Cada usuario autenticado accede únicamente a sus propias tareas.
 
 ### Gestión de tareas
 
-La aplicación permite realizar un CRUD completo de tareas mediante Cloud Firestore.
+La aplicación permite realizar un CRUD completo de tareas utilizando Cloud Firestore.
 
-Funcionalidades disponibles:
+Las funcionalidades disponibles son:
 
 * Crear nuevas tareas.
 * Visualizar las tareas del usuario autenticado.
 * Marcar tareas como completadas.
 * Volver a marcar tareas completadas como pendientes.
-* Editar el título de una tarea.
+* Editar el título y la descripción de una tarea.
 * Eliminar tareas mediante confirmación.
-* Persistencia de los datos en Cloud Firestore.
-* Actualización de la interfaz en tiempo real mediante `onSnapshot`.
-* Ordenamiento de las tareas por fecha de creación, mostrando primero las más recientes.
-* Validación de títulos vacíos.
-* Manejo de estados de carga.
-* Manejo de errores durante las operaciones.
-* Contador de tareas.
+* Persistir los datos en Cloud Firestore.
+* Actualizar la interfaz en tiempo real mediante `onSnapshot`.
+* Ordenar las tareas por fecha de creación, mostrando primero las más recientes.
+* Validar títulos vacíos.
+* Gestionar estados de carga y procesamiento.
+* Gestionar errores durante las operaciones.
+* Mostrar un contador de tareas.
 * Interfaz responsive.
 
-Las tareas se almacenan asociadas al `userId` del usuario autenticado y las reglas de seguridad de Firestore restringen el acceso para que cada usuario pueda operar únicamente sobre sus propios documentos.
+Las tareas se almacenan asociadas al `userId` del usuario autenticado. Las reglas de seguridad de Firestore restringen el acceso para que cada usuario pueda operar únicamente sobre sus propios documentos.
 
 ---
 
 ### Resumen por email
 
-Mitarea permite enviar un resumen del estado actual de las tareas mediante un botón disponible en la aplicación.
+Mitarea permite enviar un resumen del estado actual de las tareas mediante un botón disponible en la interfaz.
 
 El flujo utiliza:
 
-* Frontend desarrollado con React.
-* API Serverless de Vercel.
+* React en el frontend.
+* Una función Serverless de Vercel.
 * AWS SES para el envío del correo electrónico.
 
-El frontend realiza una petición `POST` a la función Serverless. La función procesa la solicitud y utiliza AWS SES para enviar el resumen al destinatario.
+El frontend realiza una petición `POST` a `/api/send-email`.
 
-Las credenciales privadas de AWS permanecen exclusivamente en variables de entorno del entorno Serverless y no se exponen en el frontend.
+La función Serverless valida la solicitud y utiliza AWS SES para enviar el resumen al destinatario.
+
+Las credenciales privadas de AWS permanecen exclusivamente en variables de entorno del entorno Serverless y no se exponen en el código ejecutado en el navegador.
 
 ---
 
@@ -107,33 +133,33 @@ Las credenciales privadas de AWS permanecen exclusivamente en variables de entor
 
 ### Frontend
 
-* React 19
-* TypeScript
-* Vite
-* React Router DOM
-* CSS
+* React 19.
+* TypeScript.
+* Vite.
+* React Router DOM.
+* CSS.
 
-### Backend y servicios administrados
+### Backend y servicios
 
-* Firebase Authentication
-* Cloud Firestore
-* AWS SES
-* Vercel Serverless Functions
+* Firebase Authentication.
+* Cloud Firestore.
+* AWS SES.
+* Vercel Serverless Functions.
 
 ### Testing y calidad
 
-* Vitest
-* React Testing Library
-* JSDOM
-* ESLint
+* Vitest.
+* React Testing Library.
+* JSDOM.
+* ESLint.
 
 ### Herramientas de desarrollo
 
-* Git
-* GitHub
-* Vercel
-* Firebase Console
-* AWS Console
+* Git.
+* GitHub.
+* Vercel.
+* Firebase Console.
+* AWS Console.
 
 ---
 
@@ -141,9 +167,9 @@ Las credenciales privadas de AWS permanecen exclusivamente en variables de entor
 
 Para ejecutar el proyecto localmente es necesario tener instalado:
 
-* Node.js
-* npm
-* Git
+* Node.js.
+* npm.
+* Git.
 
 Además, se requiere disponer de:
 
@@ -204,7 +230,7 @@ SES_FROM_EMAIL=
 
 ### Firebase
 
-Las variables que comienzan con `VITE_FIREBASE_` corresponden a la configuración pública del proyecto Firebase utilizado por la aplicación.
+Las variables que comienzan con `VITE_FIREBASE_` corresponden a la configuración del proyecto Firebase utilizado por la aplicación.
 
 Firebase se utiliza para:
 
@@ -214,7 +240,7 @@ Firebase se utiliza para:
 
 La configuración de Firebase se carga mediante variables de entorno en `src/services/firebase.ts`.
 
-Las credenciales privadas de AWS no se utilizan directamente en el frontend.
+La configuración pública de Firebase utilizada por el frontend no debe confundirse con las credenciales privadas de AWS. Las credenciales de AWS nunca se utilizan directamente desde el navegador.
 
 ---
 
@@ -224,10 +250,12 @@ Las variables relacionadas con AWS se utilizan exclusivamente en la función Ser
 
 Se utilizan:
 
-* `AWS_ACCESS_KEY_ID`
-* `AWS_SECRET_ACCESS_KEY`
-* `AWS_REGION`
-* `SES_FROM_EMAIL`
+```env
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_REGION=
+SES_FROM_EMAIL=
+```
 
 Las credenciales privadas de AWS nunca deben incluirse directamente en el código fuente ni subirse al repositorio.
 
@@ -249,15 +277,81 @@ npm run dev
 
 Vite iniciará la aplicación en modo desarrollo.
 
+La aplicación estará disponible en la URL local indicada por Vite, normalmente:
+
+```text
+http://localhost:5173
+```
+
+Para probar el envío de emails localmente también es necesario tener correctamente configuradas las variables de entorno utilizadas por la función Serverless.
+
 ---
 
-## Ejecutar los tests
+## Testing
 
-Para ejecutar los tests en modo interactivo:
+El proyecto utiliza **Vitest** y **React Testing Library** para validar el comportamiento de la aplicación.
 
-```bash
-npm test
+Actualmente cuenta con:
+
+```text
+Test Files  5 passed (5)
+Tests       27 passed (27)
 ```
+
+Los tests están distribuidos en cinco archivos y cubren las principales funcionalidades de la aplicación.
+
+### ProtectedRoute
+
+Se prueban:
+
+* Estado de carga.
+* Redirección de usuarios no autenticados.
+* Acceso de usuarios autenticados.
+
+### Login
+
+Se prueban:
+
+* Renderizado inicial.
+* Validación de campos.
+* Login exitoso.
+* Manejo de errores.
+* Estado de carga.
+
+### Register
+
+Se prueban:
+
+* Renderizado inicial.
+* Validación de campos.
+* Registro exitoso.
+* Manejo de errores.
+* Estado de carga.
+
+### Tasks
+
+Se prueban:
+
+* Estado sin tareas.
+* Renderizado de tareas pendientes y completadas.
+* Creación de tareas.
+* Cambio de estado.
+* Edición de tareas.
+* Eliminación con confirmación.
+* Envío exitoso del resumen por email.
+* Manejo de errores del envío de email.
+
+### API Serverless
+
+Se prueban:
+
+* Método HTTP no permitido.
+* Falta de destinatario.
+* Falta de tareas.
+* Envío exitoso mediante AWS SES.
+* Error de AWS SES.
+
+Los servicios externos se mockean cuando corresponde para mantener los tests aislados y evitar dependencias de servicios reales durante la ejecución de las pruebas.
 
 Para ejecutar todos los tests una sola vez:
 
@@ -265,20 +359,15 @@ Para ejecutar todos los tests una sola vez:
 npm test -- --run
 ```
 
-Actualmente, el proyecto cuenta con **27 tests automatizados** distribuidos en 5 archivos de prueba.
+Para ejecutar Vitest en modo interactivo:
 
-Resultado de la última ejecución:
-
-```text
-Test Files  5 passed (5)
-Tests       27 passed (27)
+```bash
+npm test
 ```
-
-Los tests cubren componentes, páginas, lógica de autenticación, gestión de tareas y la función Serverless de envío de emails.
 
 ---
 
-## Verificar el build de producción
+## Build de producción
 
 Para comprobar que el proyecto compila correctamente:
 
@@ -286,14 +375,26 @@ Para comprobar que el proyecto compila correctamente:
 npm run build
 ```
 
-Este comando ejecuta:
+Este comando realiza la compilación del proyecto y genera una versión optimizada para producción.
 
-1. La compilación y verificación de TypeScript.
-2. El proceso de build de Vite.
+El resultado se genera dentro de la carpeta:
 
-El resultado optimizado se genera dentro de la carpeta `dist`.
+```text
+dist/
+```
 
-También es posible realizar una previsualización local del build:
+La carpeta `dist` contiene los archivos finales que Vite genera para que la aplicación pueda ser servida en producción, como:
+
+* Archivos HTML.
+* Archivos JavaScript compilados y optimizados.
+* Archivos CSS.
+* Recursos estáticos.
+
+Es importante aclarar que `dist` **no contiene el código fuente original del proyecto**. Es una versión compilada y optimizada de la aplicación.
+
+Normalmente, la carpeta `dist` no se sube al repositorio porque se genera automáticamente durante el proceso de build y despliegue.
+
+Para realizar una previsualización local del build de producción:
 
 ```bash
 npm run preview
@@ -305,11 +406,13 @@ El build de producción se encuentra funcionando correctamente.
 
 ## Lint
 
-Para analizar el código con ESLint:
+Para analizar el código mediante ESLint:
 
 ```bash
 npm run lint
 ```
+
+El proyecto utiliza ESLint para detectar problemas de calidad, errores potenciales y malas prácticas en el código.
 
 La versión actual del proyecto pasa correctamente el análisis de ESLint sin errores ni advertencias.
 
@@ -402,7 +505,7 @@ Contiene la gestión global de autenticación.
 * `AuthContextObject.ts`: contiene la instancia y los tipos compartidos del contexto.
 * `useAuth.ts`: hook utilizado para acceder al contexto de autenticación.
 
-La separación permite mantener el componente `AuthProvider` independiente del hook consumidor y evita problemas relacionados con React Fast Refresh.
+La separación permite mantener el componente `AuthProvider` independiente del hook consumidor y facilita el correcto funcionamiento de React Fast Refresh.
 
 ---
 
@@ -420,7 +523,6 @@ Contiene lógica reutilizable de React.
 * Cambio de estado.
 * Estados de carga y procesamiento.
 * Manejo de errores.
-* Envío del resumen por email.
 
 ---
 
@@ -432,7 +534,7 @@ Contiene las páginas principales de la aplicación:
 * `Register`: registro de usuarios.
 * `Tasks`: gestión de tareas.
 
-Cada página cuenta con tests automatizados asociados.
+Las páginas principales cuentan con tests automatizados asociados.
 
 ---
 
@@ -491,7 +593,7 @@ Esto permite que los componentes puedan acceder al usuario autenticado y a las o
 
 La lógica relacionada con la gestión de tareas se centraliza en `useTasks`.
 
-De esta manera, las páginas se encargan principalmente de la presentación y la interacción con el usuario, mientras que la lógica de negocio y comunicación con los servicios se mantiene separada.
+De esta manera, las páginas se encargan principalmente de la presentación y de la interacción con el usuario, mientras que la lógica relacionada con las tareas se mantiene separada.
 
 ---
 
@@ -653,81 +755,13 @@ La interfaz muestra al usuario el estado correspondiente de la operación.
 
 ---
 
-## Testing
-
-El proyecto utiliza Vitest y React Testing Library para validar el comportamiento de la aplicación.
-
-Actualmente se cuenta con **27 tests automatizados**.
-
-### ProtectedRoute
-
-Se prueban:
-
-* Estado de carga.
-* Redirección de usuarios no autenticados.
-* Acceso de usuarios autenticados.
-
-### Login
-
-Se prueban:
-
-* Renderizado inicial.
-* Validación de campos vacíos.
-* Login exitoso.
-* Manejo de errores.
-* Estado de carga.
-
-### Register
-
-Se prueban:
-
-* Renderizado inicial.
-* Validación de campos vacíos.
-* Registro exitoso.
-* Manejo de errores.
-* Estado de carga.
-
-### Tasks
-
-Se prueban:
-
-* Estado sin tareas.
-* Renderizado de tareas pendientes y completadas.
-* Creación de tareas.
-* Cambio de estado.
-* Edición de tareas.
-* Eliminación con confirmación.
-* Envío exitoso del resumen por email.
-* Error de la función Serverless.
-
-### API Serverless
-
-Se prueban:
-
-* Método HTTP no permitido.
-* Falta de destinatario.
-* Falta de tareas.
-* Envío exitoso mediante AWS SES.
-* Error de AWS SES.
-
-Los servicios externos se mockean cuando corresponde para mantener los tests aislados y evitar dependencias de servicios reales durante la ejecución de las pruebas.
-
-Resultado actual:
-
-```text
-Test Files  5 passed (5)
-Tests       27 passed (27)
-```
-
----
-
 ## Deploy
 
-La aplicación se encuentra desplegada en Vercel.
+La aplicación se encuentra desplegada en producción mediante Vercel.
 
 **URL de producción:**
 
-> [https://proyecto-m4-nahuel-cordoba.vercel.app/login]
+https://proyecto-m4-nahuel-cordoba.vercel.app/login
 
 El entorno de producción utiliza variables de entorno configuradas directamente en Vercel.
 
@@ -741,6 +775,9 @@ Las principales funcionalidades verificadas en producción son:
 * Persistencia en Firestore.
 * Sincronización en tiempo real.
 * Ordenamiento de tareas por fecha de creación.
+* Cambio entre tareas pendientes y completadas.
+* Edición de tareas.
+* Eliminación de tareas.
 * Envío de resumen mediante AWS SES.
 
 ---
@@ -749,7 +786,7 @@ Las principales funcionalidades verificadas en producción son:
 
 La Inteligencia Artificial fue utilizada como herramienta de apoyo durante el proceso de desarrollo del proyecto.
 
-El objetivo no fue delegar completamente la implementación, sino utilizar IA como asistente para analizar problemas, explorar alternativas y mejorar la calidad del código manteniendo la comprensión del funcionamiento de cada parte implementada.
+El objetivo no fue delegar completamente la implementación, sino utilizar IA como asistente para analizar problemas, explorar alternativas y mejorar la calidad del código, manteniendo la comprensión del funcionamiento de cada parte implementada.
 
 Entre los principales usos se encuentran:
 
@@ -765,7 +802,7 @@ Entre los principales usos se encuentran:
 * Análisis de posibles mejoras en la estructura del proyecto.
 * Revisión de la documentación.
 
-Un patrón de uso importante consistió en utilizar la IA para analizar problemas concretos y luego verificar las propuestas mediante la documentación oficial, la ejecución de tests, el build y las pruebas manuales de la aplicación.
+Un patrón de uso importante consistió en utilizar la IA para analizar problemas concretos y posteriormente verificar las propuestas mediante documentación oficial, ejecución de tests, build y pruebas manuales de la aplicación.
 
 También se utilizó IA para generar propuestas iniciales de tests y posteriormente validar que dichos tests realmente comprobaran el comportamiento esperado de la aplicación.
 
@@ -811,12 +848,12 @@ Las principales características implementadas son:
 * Función Serverless en Vercel.
 * Variables de entorno configuradas correctamente.
 * Reglas de seguridad de Firestore implementadas.
-* Tests automatizados.
-* 27 tests pasando correctamente.
+* 27 tests automatizados pasando correctamente.
 * ESLint sin errores ni advertencias.
 * Build de producción funcionando correctamente.
 * Deploy público en Vercel.
 * Interfaz responsive.
+* Pruebas manuales de las funcionalidades principales realizadas correctamente.
 
 ---
 
@@ -860,7 +897,7 @@ Inicia el servidor de desarrollo de Vite.
 npm run build
 ```
 
-Compila TypeScript y genera el build de producción.
+Compila el proyecto y genera los archivos optimizados de producción en la carpeta `dist`.
 
 ### Preview
 
@@ -868,7 +905,7 @@ Compila TypeScript y genera el build de producción.
 npm run preview
 ```
 
-Previsualiza localmente el build de producción.
+Previsualiza localmente el build de producción generado.
 
 ### Lint
 
@@ -886,7 +923,7 @@ npm test
 
 Ejecuta Vitest en modo interactivo.
 
-Para ejecutar los tests una sola vez:
+Para ejecutar todos los tests una sola vez:
 
 ```bash
 npm test -- --run
@@ -898,7 +935,6 @@ npm test -- --run
 
 **Nahuel Córdoba**
 
-GitHub: [https://github.com/nahuelcba22]
+GitHub: https://github.com/nahuelcba22
 
-LinkedIn: [https://www.linkedin.com/in/nahuelcba02]
-
+LinkedIn: https://www.linkedin.com/in/nahuelcba02
