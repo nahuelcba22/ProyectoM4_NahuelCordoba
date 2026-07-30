@@ -8,10 +8,11 @@ import {
 } from 'vitest'
 import { render, screen, cleanup } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import type { User } from 'firebase/auth'
 import ProtectedRoute from './ProtectedRoute'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 
-vi.mock('../context/AuthContext', () => ({
+vi.mock('../context/useAuth', () => ({
   useAuth: vi.fn(),
 }))
 
@@ -86,7 +87,7 @@ describe('ProtectedRoute Component', () => {
 
   it('debe mostrar los children cuando el usuario está autenticado (loading: false)', () => {
     mockUseAuth.mockReturnValue({
-      user: { uid: '12345', email: 'user@example.com' } as any,
+      user: { uid: '12345', email: 'user@example.com' } as unknown as User,
       loading: false,
       register: vi.fn(),
       login: vi.fn(),
